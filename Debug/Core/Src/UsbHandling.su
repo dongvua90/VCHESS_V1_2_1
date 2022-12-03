@@ -1,0 +1,4 @@
+../Core/Src/UsbHandling.c:29:6:HandlingUsb	24	static
+../Core/Src/UsbHandling.c:61:6:UsbSendAddress	16	static
+../Core/Src/UsbHandling.c:72:6:UsbSendDateTime	40	static
+../Core/Src/UsbHandling.c:91:6:UsbSendDataCalibase	24	static

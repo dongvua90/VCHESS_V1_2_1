@@ -1,0 +1,6 @@
+Các lỗi gặp phải:
+1: Timer-PWM ->pulse đặt giá trị khác 0 khiến lúc chạy kênh 1 thì kênh 2 và 3 cùng chạy và tạo thành nhiễu
+2: Timer-PWM -> chiều của DMA để phát xung là từ memmory to ngoại vi
+
+Lỗi OPTION BYTE STM32:
+khi đặt bảo vệ ghi flash (PCROP protection) và sau đó muốn hủy(Disable PCROP) thì ta cần đặt RDP=BB trước.sau đó đặt RDP=AA và PCROP = 0 cùng lúc

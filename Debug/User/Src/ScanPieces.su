@@ -1,0 +1,10 @@
+../User/Src/ScanPieces.c:42:6:HAL_TIM_PWM_PulseFinishedCallback	16	static
+../User/Src/ScanPieces.c:48:6:ScanPiecesInit	8	static
+../User/Src/ScanPieces.c:56:6:PulseOut	32	static
+../User/Src/ScanPieces.c:78:6:SelectReadCoil	16	static
+../User/Src/ScanPieces.c:91:6:StartInputPWM	16	static
+../User/Src/ScanPieces.c:98:6:Measure	32	static
+../User/Src/ScanPieces.c:152:9:Scan	32	static
+../User/Src/ScanPieces.c:198:9:FileRankToSquare	16	static
+../User/Src/ScanPieces.c:204:6:DetectFenChange	16	static
+../User/Src/ScanPieces.c:217:6:FindMax	40	static

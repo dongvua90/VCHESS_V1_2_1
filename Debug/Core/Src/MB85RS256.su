@@ -1,0 +1,11 @@
+../Core/Src/MB85RS256.c:38:6:WriteProtect	16	static
+../Core/Src/MB85RS256.c:45:9:ReadStatus	24	static
+../Core/Src/MB85RS256.c:53:6:WriteEnable	16	static
+../Core/Src/MB85RS256.c:61:6:MB85RS_write	32	static
+../Core/Src/MB85RS256.c:75:6:MB85RS_read	32	static
+../Core/Src/MB85RS256.c:87:6:MB85RS_erase	152	static
+../Core/Src/MB85RS256.c:111:6:MB85RS_getPointSave	16	static
+../Core/Src/MB85RS256.c:116:6:MB85RS_WritePointSave	16	static
+../Core/Src/MB85RS256.c:124:6:MB85RS_WriteNewGame	80	static
+../Core/Src/MB85RS256.c:146:6:MB85RS_saveFen	56	static
+../Core/Src/MB85RS256.c:158:6:MB85RS_readFen	8	static

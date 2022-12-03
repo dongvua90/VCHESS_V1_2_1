@@ -1,0 +1,3 @@
+../User/Src/Bluetooth.c:11:6:BLE_PowerOn	8	static
+../User/Src/Bluetooth.c:15:6:BLE_PowerOff	8	static
+../User/Src/Bluetooth.c:20:6:BLE_Send	16	static

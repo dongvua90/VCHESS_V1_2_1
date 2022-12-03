@@ -1,0 +1,2 @@
+../User/Src/Utilities.c:12:10:ByteToAddress	16	static
+../User/Src/Utilities.c:17:10:CalculateCRC	24	static
