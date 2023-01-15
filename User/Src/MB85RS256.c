@@ -21,8 +21,11 @@
 #define SLEEP      0xB9
 
 uint16_t pointsave=0;
-extern uint8_t compression_board[41];
+extern uint8_t datamain_old[64];
+extern uint8_t data_chessclock[15];
 extern RTC_HandleTypeDef hrtc;
+
+extern uint8_t byteToPiece(uint8_t piece);
 
 uint8_t tik=0;
 uint8_t Mb85rs_dataTx[50];
@@ -114,7 +117,7 @@ void MB85RS_getPointSave(){
 	pointsave = point[0]*255 +point[1];
 }
 void MB85RS_WritePointSave(){
-	if(pointsave >1022) pointsave=0;
+	if(pointsave >712) pointsave=0;
 	uint8_t point[2];
 	point[0] = pointsave/255;
 	point[1] = pointsave%255;
@@ -122,7 +125,7 @@ void MB85RS_WritePointSave(){
 }
 
 void MB85RS_WriteNewGame(){
-	uint8_t dat[37];
+	uint8_t dat[46];
 	RTC_TimeTypeDef sTime;
 	RTC_DateTypeDef sDate;
 	HAL_RTC_GetTime(&hrtc, &sTime,RTC_FORMAT_BIN);
@@ -134,29 +137,40 @@ void MB85RS_WriteNewGame(){
 	dat[4] = sDate.Date;
 	dat[5] = sDate.Month;
 	dat[6] = sDate.Year;
-	for(int i=7;i<37;i++){
+	for(int i=7;i<46;i++){
 		dat[i]=0;
 	}
-	MB85RS_write(pointsave*37, dat, 37);
+	MB85RS_write(pointsave*46, dat, 46);
 	pointsave++;
 	MB85RS_WritePointSave();
 }
 
-// 32bytePiece + 2byteWhiteTime + 2byteBlackTime +1byteSide
+// 32bytePiece + 14byteClock
 void MB85RS_saveFen(){
-	//uint8_t dat[11];
-	//snprintf(dat,sizeof(dat),"Save:%d\r\n",pointsave);
-	//CDC_Transmit_FS(dat, 11);
-	uint8_t dat[37];
-	for(int i=0;i<37;i++){
-		dat[i]=compression_board[i+3];
+	uint8_t data[46];
+	uint8_t pieceA,pieceB,pie=0;
+	/* gắn datamain vào 32 byte tiếp theo */
+	for (int i = 0; i < 32; i++) {
+		pieceA = byteToPiece(datamain_old[pie]);
+		pie++;
+		pieceB = byteToPiece(datamain_old[pie]);
+		pie++;
+		data[i] = (pieceA << 4) + pieceB;
 	}
-	MB85RS_write(pointsave*37,dat, 37);
+	for (int i = 0; i < 14; i++) {
+		data[32 + i] = data_chessclock[i];
+	}
+	MB85RS_write(pointsave*46,data, 46);
 	pointsave++;
 	MB85RS_WritePointSave();
 }
-void MB85RS_readFen(){
-	MB85RS_read(pointsave*37,data_rrx,37);
+
+void handlerMb85rs() {
+	if (data_chessclock[9] == 1) { //CLOCKSTATUS { READY=0,BEGIN_PLAY=1,PLAYING=2,PLAY_TO_PAUSE=3,PAUSE_TO_PLAY=4,ONE_SIDE_OVER_TIME=5,ALL_SIDE_OVER_TIME=6 };
+		MB85RS_WriteNewGame();
+	} else if (data_chessclock[9] == 2) {
+		MB85RS_saveFen();
+	}
 }
 
 

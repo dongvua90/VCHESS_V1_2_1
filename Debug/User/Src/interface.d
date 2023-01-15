@@ -63,7 +63,8 @@ User/Src/interface.o: ../User/Src/interface.c \
  ../Middlewares/Third_Party/FreeRTOS/Source/include/queue.h \
  ../Middlewares/Third_Party/FreeRTOS/Source/include/event_groups.h \
  ../Middlewares/Third_Party/FreeRTOS/Source/include/timers.h \
- C:/Users/dongv/Documents/STM32CUBE_IDE/VCHESS_V1.2.1/User/Inc/Utilities.h
+ C:/Users/dongv/Documents/STM32CUBE_IDE/VCHESS_V1.2.1/User/Inc/Utilities.h \
+ C:/Users/dongv/Documents/STM32CUBE_IDE/VCHESS_V1.2.1/User/Inc/RtcRealTime.h
 C:/Users/dongv/Documents/STM32CUBE_IDE/VCHESS_V1.2.1/User/Inc/Interface.h:
 ../Core/Inc/main.h:
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h:
@@ -130,3 +131,4 @@ C:/Users/dongv/Documents/STM32CUBE_IDE/VCHESS_V1.2.1/User/Inc/MB85RS256.h:
 ../Middlewares/Third_Party/FreeRTOS/Source/include/event_groups.h:
 ../Middlewares/Third_Party/FreeRTOS/Source/include/timers.h:
 C:/Users/dongv/Documents/STM32CUBE_IDE/VCHESS_V1.2.1/User/Inc/Utilities.h:
+C:/Users/dongv/Documents/STM32CUBE_IDE/VCHESS_V1.2.1/User/Inc/RtcRealTime.h:

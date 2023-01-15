@@ -13,7 +13,6 @@ C_SRCS += \
 ../User/Src/ScanPieces.c \
 ../User/Src/Status.c \
 ../User/Src/TaskScanPiece.c \
-../User/Src/UsbHandling.c \
 ../User/Src/Utilities.c \
 ../User/Src/calibase.c \
 ../User/Src/interface.c 
@@ -27,7 +26,6 @@ C_DEPS += \
 ./User/Src/ScanPieces.d \
 ./User/Src/Status.d \
 ./User/Src/TaskScanPiece.d \
-./User/Src/UsbHandling.d \
 ./User/Src/Utilities.d \
 ./User/Src/calibase.d \
 ./User/Src/interface.d 
@@ -41,7 +39,6 @@ OBJS += \
 ./User/Src/ScanPieces.o \
 ./User/Src/Status.o \
 ./User/Src/TaskScanPiece.o \
-./User/Src/UsbHandling.o \
 ./User/Src/Utilities.o \
 ./User/Src/calibase.o \
 ./User/Src/interface.o 
@@ -54,7 +51,7 @@ User/Src/%.o User/Src/%.su: ../User/Src/%.c User/Src/subdir.mk
 clean: clean-User-2f-Src
 
 clean-User-2f-Src:
-	-$(RM) ./User/Src/Bluetooth.d ./User/Src/Bluetooth.o ./User/Src/Bluetooth.su ./User/Src/ChessClock.d ./User/Src/ChessClock.o ./User/Src/ChessClock.su ./User/Src/MB85RS256.d ./User/Src/MB85RS256.o ./User/Src/MB85RS256.su ./User/Src/RtcRealTime.d ./User/Src/RtcRealTime.o ./User/Src/RtcRealTime.su ./User/Src/SaveGame.d ./User/Src/SaveGame.o ./User/Src/SaveGame.su ./User/Src/ScanPieces.d ./User/Src/ScanPieces.o ./User/Src/ScanPieces.su ./User/Src/Status.d ./User/Src/Status.o ./User/Src/Status.su ./User/Src/TaskScanPiece.d ./User/Src/TaskScanPiece.o ./User/Src/TaskScanPiece.su ./User/Src/UsbHandling.d ./User/Src/UsbHandling.o ./User/Src/UsbHandling.su ./User/Src/Utilities.d ./User/Src/Utilities.o ./User/Src/Utilities.su ./User/Src/calibase.d ./User/Src/calibase.o ./User/Src/calibase.su ./User/Src/interface.d ./User/Src/interface.o ./User/Src/interface.su
+	-$(RM) ./User/Src/Bluetooth.d ./User/Src/Bluetooth.o ./User/Src/Bluetooth.su ./User/Src/ChessClock.d ./User/Src/ChessClock.o ./User/Src/ChessClock.su ./User/Src/MB85RS256.d ./User/Src/MB85RS256.o ./User/Src/MB85RS256.su ./User/Src/RtcRealTime.d ./User/Src/RtcRealTime.o ./User/Src/RtcRealTime.su ./User/Src/SaveGame.d ./User/Src/SaveGame.o ./User/Src/SaveGame.su ./User/Src/ScanPieces.d ./User/Src/ScanPieces.o ./User/Src/ScanPieces.su ./User/Src/Status.d ./User/Src/Status.o ./User/Src/Status.su ./User/Src/TaskScanPiece.d ./User/Src/TaskScanPiece.o ./User/Src/TaskScanPiece.su ./User/Src/Utilities.d ./User/Src/Utilities.o ./User/Src/Utilities.su ./User/Src/calibase.d ./User/Src/calibase.o ./User/Src/calibase.su ./User/Src/interface.d ./User/Src/interface.o ./User/Src/interface.su
 
 .PHONY: clean-User-2f-Src
 

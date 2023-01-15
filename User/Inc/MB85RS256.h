@@ -22,6 +22,6 @@ void MB85RS_getPointSave();
 void MB85RS_WritePointSave();
 void MB85RS_WriteNewGame();
 void MB85RS_saveFen();
-void MB85RS_readFen();
+void handlerMb85rs();
 
 #endif /* INC_MB85RS256_H_ */

@@ -31,8 +31,8 @@
 
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
-extern uint8_t dataUsb_rxlength;
-extern uint8_t dataUsb_rx[64];
+uint8_t dataUsb_rxlength;
+uint8_t dataUsb_rx[64];
 /* USER CODE END PV */
 
 /** @addtogroup STM32_USB_OTG_DEVICE_LIBRARY

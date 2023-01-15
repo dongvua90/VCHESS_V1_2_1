@@ -64,7 +64,6 @@
 "./User/Src/ScanPieces.o"
 "./User/Src/Status.o"
 "./User/Src/TaskScanPiece.o"
-"./User/Src/UsbHandling.o"
 "./User/Src/Utilities.o"
 "./User/Src/calibase.o"
 "./User/Src/interface.o"

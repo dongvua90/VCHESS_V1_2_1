@@ -8,14 +8,14 @@
 
 //										0     1    2     3     4     5     6     7     8     9    10     11   12     13    14     15     16    17
 const uint16_t ListFrequency[18]	={  90,  96,  103,  110,  118,  130,  140,  151,  165,  180,  200,  220,  242,  265,  295,   320,   345,  370};
-//const uint8_t ListLengthOut[18]		={  10,	 10,  10,	10,	  10,	10,	  10,	15,	  10,	10,	  7,	7,	  7,	 7,	    7,	  7,	 7,	   7};
+const uint8_t ListLengthOut[18]		={  15,	 10,  10,	10,	  10,	10,	  10,	10,	  10,	10,	  10,	 10,   10,	 10,    8,	  7,	 7,    7};
 // gia tri period chuan :       	        933   873   813   763   713   648   602   556   510   466   421   381   347   317   285   262   243   227
-const uint16_t mark_period[19] 		= {  950,  903,  828,  788,  738,  681,  625,  570,  533,  480,  430,  401,  364,  332,  301,  273,  253,  235,  200};
+const uint16_t mark_period[19] 		= {  950,  903,  833,  788,  738,  681,  625,  570,  533,  480,  430,  401,  364,  332,  301,  273,  253,  235,  200};
 //                                   	  K      Q     B    N     R     k     q     b     n     r     p1    p2    p3    p4    P1    P2    P3    P4
 //										  0		 1     2    3     4     5     6     7     8     9     10    11    12    13    14    15    16    17
-const uint16_t ListIC_measure[18]  	={25000,24000,22000,20000,20000,18000,15000,14000,18000,10000, 9000, 8000, 8000 ,8000 ,8000  ,8000  ,8000 ,8000}; // new
-
-
+//const uint16_t ListIC_measure[18] =  {30000,28000,28000,28000,28000,28000,18000,18000,18000,16000, 12000, 12000,12000,12000,12000,12000,12000,12000}; // new
+//const uint16_t ListIC_measure[18]  	=  {34000,30000,28000,28000,26000,25000,24000,22000,12000,10000,  8000,  8000, 8000, 8000, 6000, 6000, 6000, 6000};
+const uint16_t ListIC_measure[18]  	= {30000,28000,27000,26000,25000,24000,23000,22000,21000,20000,19000,18000,17000,16000,15000,14000,13000,12000};
 extern TIM_HandleTypeDef htim1;
 extern TIM_HandleTypeDef htim2;
 extern TIM_HandleTypeDef htim3;
@@ -88,18 +88,36 @@ void SelectReadCoil(uint8_t readCoil)
 		case 8: CD4051_A_1; CD4051_B_1; CD4051_C_0;break; //coil_8 <-> X3
 	}
 }
-void StartInputPWM(uint8_t type)
-{
-	is_start_measure = true;  															// bật flag measure
-	memset(inputCapture_data,0,sizeof(inputCapture_data)); 								// clear ic_data
-	TIM4->ARR = ListIC_measure[type];  													// xác định khoảng đo tối đa
-	HAL_TIM_IC_Start_DMA(&htim4, TIM_CHANNEL_2,(uint32_t*)inputCapture_data, IC_MAX);  	// giá trị đo đạc lưu vào ic_data
-}
+//void StartInputPWM(uint8_t type)
+//{
+//	is_start_measure = true;  															// bật flag measure
+//	memset(inputCapture_data,0,sizeof(inputCapture_data)); 								// clear ic_data
+//	TIM4->ARR = ListIC_measure[type];  													// xác định khoảng đo tối đa
+//	HAL_TIM_IC_Start_DMA(&htim4, TIM_CHANNEL_2,(uint32_t*)inputCapture_data, IC_MAX);  	// giá trị đo đạc lưu vào ic_data
+//}
 void Measure(uint8_t type,uint8_t outCoil,uint8_t readCoil)
 {
-	PulseOut(type,10, outCoil);
+//	if(type >=100){
+//		PulseOut(type,8, outCoil);
+//	}else{
+//		PulseOut(type,6, outCoil);
+//	}
+	PulseOut(type,ListLengthOut[type], outCoil);
 	SelectReadCoil(readCoil);
-	StartInputPWM(type);
+	//StartInputPWM(type);
+	is_start_measure = true;  															// bật flag measure
+	//memset(inputCapture_data,0,sizeof(inputCapture_data)); 								// clear ic_data
+	for(int i=0;i<IC_MAX;i++){
+		inputCapture_data[i]=0;
+	}
+	if(outCoil==8 && readCoil==8){
+		TIM4->ARR = 60000;
+	}else{
+		TIM4->ARR = ListIC_measure[type];
+	}												// xác định khoảng đo tối đa
+	HAL_TIM_IC_Start_DMA(&htim4, TIM_CHANNEL_2,(uint32_t*)inputCapture_data, IC_MAX);  	// giá trị đo đạc lưu vào ic_data
+
+
 	startmeasure=0;
 	stopmeasure=0;
 	responce_length=0;
@@ -148,22 +166,27 @@ void Measure(uint8_t type,uint8_t outCoil,uint8_t readCoil)
 /* hàm quét Pieces
  * Return 0: quá trình quét hoàn tất và không phát hiện sự thay đổi của FEN
  * Return 1: quá trình quét hoàn tất và phát hiện có sự thay đổi FEN
- * Return 2: quá trình quét có xảy ra ChessClock Side Thay đổi */
-uint8_t Scan()
+ * Return 2: quá trình quét có xảy ra ChessClock Side Thay đổi
+ *  enableClockSideInterrupt: có cho phép return lại khi chessclock thay đổi hay không */
+SCANRESULT Scan(bool enableClockSideInterrup)
 {
-	bool isChessclockInterrupt = false;
-	CHESSCLOCKINTERRUPT:
-	memset(datamain,0,sizeof(datamain)); // clear data
+	// clear data
+	for(int i=0;i<64;i++){
+		datamain[i]=0;
+	}
+	for(int t=0;t<18;t++){
+		for(int s =0;s<64;s++){
+			datapieces[t][s][PULSES]=0;
+			datapieces[t][s][PERIOD]=0;
+		}
+	}
 	for(int type=17;type>=0;type--){
 		for(int outCoil=1;outCoil<=8;outCoil++){
 			for(int readCoil=1;readCoil<=8;readCoil++){
-
-				if(chessclock_interrup==true){
+				if(chessclock_interrup==true && enableClockSideInterrup==true){
 					chessclock_interrup=false;
-					isChessclockInterrupt = true;
-					goto CHESSCLOCKINTERRUPT; // tiến hành quét lại từ đầu
+					return SCAN_SIDE_CHANGED;
 				}
-
 				uint8_t sq = FileRankToSquare(outCoil, readCoil);
 				if(datamain[sq]==0){  // nếu ô quét chưa thấy piece nào thì tiến hành đo đạc
 					Measure(type,outCoil,readCoil);
@@ -188,9 +211,8 @@ uint8_t Scan()
 			}
 		}
 	}
-	if(DetectFenChange()) return 1;
-	if(isChessclockInterrupt) return 2;
-	return 0;
+	if(DetectFenChange()) return SCAN_FEN_CHANGE;
+	return SCAN_NO_FEN_CHANGE;
 }
 
 
