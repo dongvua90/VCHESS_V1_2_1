@@ -57,8 +57,6 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
-#define LED_Pin GPIO_PIN_13
-#define LED_GPIO_Port GPIOC
 #define BLE_STA_Pin GPIO_PIN_0
 #define BLE_STA_GPIO_Port GPIOA
 #define BLE_PWRC_Pin GPIO_PIN_1
@@ -75,12 +73,15 @@ void Error_Handler(void);
 #define CD4051_C_GPIO_Port GPIOB
 #define IC_IN_TIM4_CH2_Pin GPIO_PIN_7
 #define IC_IN_TIM4_CH2_GPIO_Port GPIOB
+#define LED_ON 	HAL_GPIO_WritePin(LED_STATUS_GPIO_Port, LED_STATUS_Pin, GPIO_PIN_SET)
+#define LED_OFF HAL_GPIO_WritePin(LED_STATUS_GPIO_Port, LED_STATUS_Pin, GPIO_PIN_RESET);
 /* USER CODE BEGIN Private defines */
 #define CALIBASE
-#define ADDRESSBOARD 1
+#define ADDRESSBOARD
 #define ADDRESSBOARD_PART0 0
 #define ADDRESSBOARD_PART1 0
-#define ADDRESSBOARD_PART2 1
+#define ADDRESSBOARD_PART2 5
+
 #define ADDR_PART0	 ADDRESSBOARD/64516
 #define ADDR_PART1	(ADDRESSBOARD-ADDR_PART0*64516)/254
 #define ADDR_PART2	(ADDRESSBOARD-ADDR_PART0*64516-ADDR_PART1*254)

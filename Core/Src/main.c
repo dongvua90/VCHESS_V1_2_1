@@ -117,11 +117,12 @@ int main(void)
   MX_TIM4_Init();
   MX_I2C1_Init();
   MX_SPI1_Init();
-  MX_USART2_UART_Init();
   MX_USART1_UART_Init();
   MX_RTC_Init();
   /* USER CODE BEGIN 2 */
-
+  LED_ON;
+  HAL_Delay(1000);
+  LED_OFF;
   initReceiverUart();
   //TaskScanPieceInit();
   /* USER CODE END 2 */

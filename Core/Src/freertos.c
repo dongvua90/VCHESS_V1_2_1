@@ -27,7 +27,6 @@
 /* USER CODE BEGIN Includes */
 #include "Bluetooth.h"
 #include "ChessClock.h"
-#include "Status.h"
 #include "Utilities.h"
 #include "Interface.h"
 /* USER CODE END Includes */
@@ -159,7 +158,6 @@ void StartDefaultTask(void const * argument)
   /* Infinite loop */
   for(;;)
   {
-	  Status_Task();
 	  osDelay(1);
   }
   /* USER CODE END StartDefaultTask */

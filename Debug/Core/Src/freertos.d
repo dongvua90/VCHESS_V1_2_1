@@ -55,7 +55,6 @@ Core/Src/freertos.o: ../Core/Src/freertos.c \
  C:/Users/dongv/Documents/STM32CUBE_IDE/VCHESS_V1.2.1/User/Inc/Bluetooth.h \
  ../Core/Inc/usart.h ../Core/Inc/main.h \
  C:/Users/dongv/Documents/STM32CUBE_IDE/VCHESS_V1.2.1/User/Inc/ChessClock.h \
- C:/Users/dongv/Documents/STM32CUBE_IDE/VCHESS_V1.2.1/User/Inc/Status.h \
  C:/Users/dongv/Documents/STM32CUBE_IDE/VCHESS_V1.2.1/User/Inc/Utilities.h \
  C:/Users/dongv/Documents/STM32CUBE_IDE/VCHESS_V1.2.1/User/Inc/Interface.h \
  C:/Users/dongv/Documents/STM32CUBE_IDE/VCHESS_V1.2.1/User/Inc/RtcRealTime.h
@@ -117,7 +116,6 @@ C:/Users/dongv/Documents/STM32CUBE_IDE/VCHESS_V1.2.1/User/Inc/Bluetooth.h:
 ../Core/Inc/usart.h:
 ../Core/Inc/main.h:
 C:/Users/dongv/Documents/STM32CUBE_IDE/VCHESS_V1.2.1/User/Inc/ChessClock.h:
-C:/Users/dongv/Documents/STM32CUBE_IDE/VCHESS_V1.2.1/User/Inc/Status.h:
 C:/Users/dongv/Documents/STM32CUBE_IDE/VCHESS_V1.2.1/User/Inc/Utilities.h:
 C:/Users/dongv/Documents/STM32CUBE_IDE/VCHESS_V1.2.1/User/Inc/Interface.h:
 C:/Users/dongv/Documents/STM32CUBE_IDE/VCHESS_V1.2.1/User/Inc/RtcRealTime.h:

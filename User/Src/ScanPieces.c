@@ -1,40 +1,34 @@
-/*
- * ScanPieces.c
- *
- *  Created on: Sep 17, 2022
- *      Author: goku
- */
 #include "ScanPieces.h"
 
-//										0     1    2     3     4     5     6     7     8     9    10     11   12     13    14     15     16    17
-const uint16_t ListFrequency[18]	={  90,  96,  103,  110,  118,  130,  140,  151,  165,  180,  200,  220,  242,  265,  295,   320,   345,  370};
-const uint8_t ListLengthOut[18]		={  15,	 10,  10,	10,	  10,	10,	  10,	10,	  10,	10,	  10,	 10,   10,	 10,    8,	  7,	 7,    7};
-// gia tri period chuan :       	        933   873   813   763   713   648   602   556   510   466   421   381   347   317   285   262   243   227
-const uint16_t mark_period[19] 		= {  950,  903,  833,  788,  738,  681,  625,  570,  533,  480,  430,  401,  364,  332,  301,  273,  253,  235,  200};
-//                                   	  K      Q     B    N     R     k     q     b     n     r     p1    p2    p3    p4    P1    P2    P3    P4
-//										  0		 1     2    3     4     5     6     7     8     9     10    11    12    13    14    15    16    17
-//const uint16_t ListIC_measure[18] =  {30000,28000,28000,28000,28000,28000,18000,18000,18000,16000, 12000, 12000,12000,12000,12000,12000,12000,12000}; // new
-//const uint16_t ListIC_measure[18]  	=  {34000,30000,28000,28000,26000,25000,24000,22000,12000,10000,  8000,  8000, 8000, 8000, 6000, 6000, 6000, 6000};
-const uint16_t ListIC_measure[18]  	= {30000,28000,27000,26000,25000,24000,23000,22000,21000,20000,19000,18000,17000,16000,15000,14000,13000,12000};
+//										0		1		2		3		4		5		6		7		8		9		10		11		12		13		14		15		16		17
+const uint16_t ListFrequency[18]	={  90,		96,  	103,  	110,  	118,  	130,  	140,  	151,  	165,  	180,  	200,  	220,  	242,  	265,  	295,   	320,   	345,  	370};
+const uint8_t ListLengthOut[18]		={  10,	 	10,  	10,		10,	  	10,		10,	  	8,		8,	  	5,		7,	   	7,	 	8,    	8,	 	10,    	10,	  	10,	  	12,   	12};
+// gia tri period chuan :       	 		933  	873   	813   	763   	713   	648   	602   	556   	510   	466   	421   	381   	347   	317   	285   	262   	243   	227
+const uint16_t mark_period[19] 		={	950,  	903,  	833,  	788,  	738,  	681,  	620,  	570,  	533,  	480,  	430,  	401,  	364,  	327,  	301,  	273,  	253,  	230,  	200};
+//                                   	K      	Q     	B    	N     	R     	k     	q     	b     	n     	r     	p1    	p2    	p3    	p4    	P1    	P2    	P3    	P4
+const uint16_t ListIC_measure[18]  	={	30000,	40000,	27000,	26000,	25000,	24000,	23000,	22000,	32000,	22000, 	22000,	22000,	22000,	22000,	12000,	12000,	12000,	12000};
+const uint8_t offsetMeasure[18]		={	1,		5,		5,		5,		5,		1,		5,		5,		5,		5,		5,		5,		5,		5,		5,		5,		5,		5};
+const uint8_t sttscan[18] 			={0,1,2,3,4,5,6,7,8,9,10,11,12,13,15,16,14,17}; // stt scan piece type
+const uint8_t sttInOut[8] 			={1,4,7,2,5,8,3,6};								// stt output pulse & input coil
+
 extern TIM_HandleTypeDef htim1;
 extern TIM_HandleTypeDef htim2;
 extern TIM_HandleTypeDef htim3;
 extern TIM_HandleTypeDef htim4;
-
 extern bool chessclock_interrup;
 
-uint16_t point_start_measure; 		// biến xác định điểm bắt đầu đo đạc PWM
-bool is_start_measure = false;  	// flag xác định điểm bắt đầu đo PWM
-uint16_t datapieces[18][64][2];  	// 18-type 	64-square	2-period+length
-uint8_t datamain[64];				// chứa dữ liệu chính của pieces
-uint8_t datamain_old[64];			// chứa dữ liệu cũ để tìm sự khác biêt FEN
+volatile uint16_t point_start_measure; 		// biến xác định điểm bắt đầu đo đạc PWM
+volatile bool is_start_measure = false;  	// flag xác định điểm bắt đầu đo PWM
+uint16_t datapieces[18][64][2];  			// 18-type 	64-square	2-period+length
+uint8_t datamain[64];						// chứa dữ liệu chính của pieces
+uint8_t datamain_old[64];					// chứa dữ liệu cũ để tìm sự khác biêt FEN
 
 //pwmdata là duty của pwm được truyền qua DMA
 uint16_t pwmdata[40];	// dùng cho timer 16bit
 uint32_t pwmdata32[40]; // dùng cho timer 32bit
 uint16_t inputCapture_data[IC_MAX]; // chứa dữ liệu InputPwm
 uint16_t startmeasure,stopmeasure;
-uint8_t responce_length;
+uint8_t  responce_length;
 uint16_t responce_period;
 
 
@@ -58,12 +52,14 @@ void PulseOut(uint8_t type,uint8_t length,uint8_t outCoil)
 	uint16_t _length = length;
 	uint16_t period = 84000/ListFrequency[type]; // tính toán chu kỳ
 	uint16_t duty	 = period/2;
-	for(int i=0;i<_length;i++){
-			 pwmdata[i] = duty;
-			 pwmdata32[i] = (uint32_t)duty;
+	for(int i=0;i<_length;i++)
+	{
+		pwmdata[i] = duty;
+		pwmdata32[i] = (uint32_t)duty;
 	}
 	pwmdata[_length] =0;
 	pwmdata32[_length]=0;
+
 	switch(outCoil){
 	case 1:	TIM3->ARR = period; 			HAL_TIM_PWM_Start_DMA(&htim3, TIM_CHANNEL_1,(uint32_t *)pwmdata, _length+1); 	break;
 	case 2:	TIM2->ARR = (uint32_t)period; 	HAL_TIM_PWM_Start_DMA(&htim2, TIM_CHANNEL_2,(uint32_t *)pwmdata32, _length+1); 	break;
@@ -88,48 +84,68 @@ void SelectReadCoil(uint8_t readCoil)
 		case 8: CD4051_A_1; CD4051_B_1; CD4051_C_0;break; //coil_8 <-> X3
 	}
 }
-//void StartInputPWM(uint8_t type)
-//{
-//	is_start_measure = true;  															// bật flag measure
-//	memset(inputCapture_data,0,sizeof(inputCapture_data)); 								// clear ic_data
-//	TIM4->ARR = ListIC_measure[type];  													// xác định khoảng đo tối đa
-//	HAL_TIM_IC_Start_DMA(&htim4, TIM_CHANNEL_2,(uint32_t*)inputCapture_data, IC_MAX);  	// giá trị đo đạc lưu vào ic_data
-//}
+
+
 void Measure(uint8_t type,uint8_t outCoil,uint8_t readCoil)
 {
-//	if(type >=100){
-//		PulseOut(type,8, outCoil);
-//	}else{
-//		PulseOut(type,6, outCoil);
-//	}
+	/* Phát xung và thiết lập Cuộn cảm nhận tín hiệu */
 	PulseOut(type,ListLengthOut[type], outCoil);
 	SelectReadCoil(readCoil);
-	//StartInputPWM(type);
-	is_start_measure = true;  															// bật flag measure
-	//memset(inputCapture_data,0,sizeof(inputCapture_data)); 								// clear ic_data
-	for(int i=0;i<IC_MAX;i++){
-		inputCapture_data[i]=0;
-	}
-	if(outCoil==8 && readCoil==8){
-		TIM4->ARR = 60000;
-	}else{
-		TIM4->ARR = ListIC_measure[type];
-	}												// xác định khoảng đo tối đa
-	HAL_TIM_IC_Start_DMA(&htim4, TIM_CHANNEL_2,(uint32_t*)inputCapture_data, IC_MAX);  	// giá trị đo đạc lưu vào ic_data
-
-
+	/* Đưa các biến sử dụng trong đo đạc về giá trị ban đầu */
+	is_start_measure = true;
+	point_start_measure=0;
 	startmeasure=0;
 	stopmeasure=0;
 	responce_length=0;
 	responce_period=0;
+	for(int i=0;i<IC_MAX;i++){
+		inputCapture_data[i]=0;	// Clear ic_data
+	}
 	uint8_t sq = FileRankToSquare(outCoil, readCoil);
+	bool firstcheck=true;
+	uint16_t period = 84000/ListFrequency[type]; 	// tính toán chu kỳ
 
-	while(is_start_measure){};  // chờ cho quá trình đo PWM hoàn thành
+	/*	Thiết lập Timer để đo đạc tín hiệu trả về	*/
+	TIM4->ARR = ListIC_measure[type];	// xác định khoảng đo tối đa
+	HAL_TIM_IC_Start_DMA(&htim4, TIM_CHANNEL_2,(uint32_t*)inputCapture_data, IC_MAX);  	// giá trị đo đạc lưu vào ic_data
+
+    /* chờ cho quá trình đo PWM hoàn thành */
+	while(is_start_measure){
+		/*	Kiểm tra liên tục xem có xung phản hồi hay không? nếu không thì dừng quá trình đo lại luôn để tiết kiệm thời gian	*/
+		if(firstcheck){
+			if(TIM4->CNT > (period*18)){
+				if(inputCapture_data[10]==0){
+					/* Nếu không có xung phản hồi thì reset biến và đặt lại timer */
+					firstcheck=false;
+					responce_length=0;
+					responce_period=0;
+					datapieces[type][sq][PULSES]=0;
+					datapieces[type][sq][PERIOD]=0;
+					TIM4->CNT=0;
+					HAL_TIM_IC_Stop_DMA(&htim4, TIM_CHANNEL_2);
+					is_start_measure=false;
+					return;
+				}
+			}
+		}
+
+	};
 
 	/* Pulse input được đo từ lúc phát PulseOut đến timesIC_measure[tupe]
-	 * để xác định số Pulses ta chỉ tính Pulse phản hồi (từ lúc phát Pulse kết thúc) đến giới hạn thời gian đo */
+	 * để xác định số Pulses ta chỉ tính Pulse phản hồi (từ lúc phát Pulse kết thúc) đến giới hạn thời gian đo
+	 *
+	 * 	  điểm bắt đầu Measure ⏤⏤⏤⏤┓						    ┎⏤⏤⏤⏤⏤⏤ điểm kết thúc Measure
+	 * 	    						│					        │
+	 * 	PulseOut:	___⎍⎍⎍⎍⎍⎍⎍⎍⎍⎍⎍⎍⎍⎍⎍
+	 * 	ReadCoil:	__________⎍⎍⎍⎍⎍⎍⎍⎍⎍⎍⎍⎍⎍⎍⎍⎍⎍⎍⎍⎍⎍⎍⎍⎍⎍⎍⎍⎍⎍⎍⎍⎍⎍⎍⎍⎍⎍⎍⎍_
+	 * 								│___││___│
+	 * 							   	  │    │
+	 * 	bỏ cách 1 khoảng trước khi đo ┘	   │
+	 * 	sử dụng 1 khoảng để đo tần số ⏤⏤⏤⏤┘
+	 *
+	 *  */
 
-	// xác định điểm đầu Measure
+	/* xác định điểm đầu Measure */
 	for(int i=0;i<IC_MAX;i++){
 		if(inputCapture_data[i] >point_start_measure){
 			startmeasure=i;
@@ -143,25 +159,32 @@ void Measure(uint8_t type,uint8_t outCoil,uint8_t readCoil)
 		}
 	}
 
-	// xác định điểm cuối Measure
+	/* xác định điểm cuối Measure */
 	for(int i=startmeasure;i<IC_MAX-1;i++){
 		stopmeasure=i;
 		if(inputCapture_data[i+1] < inputCapture_data[i])break;
 	}
 	if(inputCapture_data[IC_MAX-1]!=0) stopmeasure=IC_MAX;
 
-	// tính toán số lượng Pulses phản hồi
+	/* tính toán số lượng Pulses phản hồi */
 	responce_length = stopmeasure-startmeasure;
 
 	// tính period phản hồi
-	if(responce_length>=5){
-		responce_period = (inputCapture_data[startmeasure+5] - inputCapture_data[startmeasure]) / 5;
-	}else if(responce_length>3){
-		responce_period = (inputCapture_data[startmeasure+responce_length-1]-inputCapture_data[startmeasure])/(responce_length-1);
+	if(responce_length > offsetMeasure[type]+RANGE_MEASURE){
+		responce_period = (inputCapture_data[startmeasure+offsetMeasure[type]+RANGE_MEASURE] - inputCapture_data[startmeasure + offsetMeasure[type]]) / RANGE_MEASURE;
 	}
-	// đặt số xung phản hồi vào từng ô
+#ifdef ONLYTYPE
+	if(responce_period <= mark_period[type] && responce_period >mark_period[type+1]){
+		datapieces[type][sq][PULSES]=responce_length;
+		datapieces[type][sq][PERIOD]=responce_period;
+	}else{
+		datapieces[type][sq][PULSES]=0;
+		datapieces[type][sq][PERIOD]=0;
+	}
+#else
 	datapieces[type][sq][PULSES]=responce_length;
 	datapieces[type][sq][PERIOD]=responce_period;
+#endif
 }
 /* hàm quét Pieces
  * Return 0: quá trình quét hoàn tất và không phát hiện sự thay đổi của FEN
@@ -170,7 +193,7 @@ void Measure(uint8_t type,uint8_t outCoil,uint8_t readCoil)
  *  enableClockSideInterrupt: có cho phép return lại khi chessclock thay đổi hay không */
 SCANRESULT Scan(bool enableClockSideInterrup)
 {
-	// clear data
+	/* Reset lại các biến */
 	for(int i=0;i<64;i++){
 		datamain[i]=0;
 	}
@@ -180,9 +203,15 @@ SCANRESULT Scan(bool enableClockSideInterrup)
 			datapieces[t][s][PERIOD]=0;
 		}
 	}
-	for(int type=17;type>=0;type--){
-		for(int outCoil=1;outCoil<=8;outCoil++){
-			for(int readCoil=1;readCoil<=8;readCoil++){
+	/* Quét tất cả các Piece */
+	for(int i=0;i<18;i++){
+		int type = sttscan[i];
+		int outCoil =0;
+		int readCoil =0;
+		for(int j=0;j<8;j++){
+			readCoil = sttInOut[j];
+			for(int k=0;k<8;k++){
+				outCoil = sttInOut[k];
 				if(chessclock_interrup==true && enableClockSideInterrup==true){
 					chessclock_interrup=false;
 					return SCAN_SIDE_CHANGED;
@@ -193,20 +222,70 @@ SCANRESULT Scan(bool enableClockSideInterrup)
 				}
 			}
 		}
-		// chọn piece mạnh nhất
-		SQData firstMax,secondMax;
-		FindMax(type, &firstMax, &secondMax);
+		// edit new
+		int8_t sqDetects[10]={-5,-5,-5,-5,-5,-5,-5,-5,-5,-5}; // mảng các ô có pulseLength > MinValue và có period nằm trong ngưỡng detect
+		uint8_t lengthValid =0; // số lượng các ô hợp lệ
+		/* tìm các ô có pulseLength và period hợp lệ  */
+		for (int8_t sq = 0; sq < 64; sq++) {
+			// số xung phải lớn hơn ngưỡng calibase
+			if (datapieces[type][sq][PULSES] >= getMarkSq(type, sq)) {// period phải nằm trong khoảng của type piece
+				if (datapieces[type][sq][PERIOD] <= mark_period[type] && datapieces[type][sq][PERIOD] > mark_period[type + 1])
+				{
+					sqDetects[lengthValid] = sq;
+					lengthValid++;
+					if(lengthValid > 10) break; // nếu có lớn hơn 10 ô hợp lệ thì break
+				}
+			}
+		}
+		/* nếu có 1 ô hợp lệ thì đó là piece  */
+		if(lengthValid==1)
+		{
+			datamain[sqDetects[0]]=type+1;
+		}else if(lengthValid > 1)	// tìm ra 2 ô có giá trị lớn nhất
+		{
+			SQData firstMax,secondMax;
+			firstMax.pulses=-1;firstMax.square=-1;
+			secondMax.pulses=-2;secondMax.square=-2;
 
-		// WKING & BKING chỉ chọn 1 giá trị lớn nhất
-		if(type == 0 || type==5){
-			if(firstMax.square >=0){
-				datamain[firstMax.square] = type+1;
+			for(int v=0;v<lengthValid;v++) // lặp lại tất cả các giá trị
+			{
+				if(datapieces[type][sqDetects[v]][PULSES] >= firstMax.pulses)
+				{
+					secondMax.pulses = firstMax.pulses;
+					secondMax.square = firstMax.square;
+					firstMax.pulses  = datapieces[type][sqDetects[v]][PULSES];
+					firstMax.square = sqDetects[v];
+				}else if(datapieces[type][sqDetects[v]][PULSES] >= secondMax.pulses){
+					secondMax.pulses = datapieces[type][sqDetects[v]][PULSES];
+					secondMax.square = sqDetects[v];
+				}
 			}
-		}else{
-			if(firstMax.square >=0){
-				datamain[firstMax.square] = type+1;
+			/* nếu type là King thì chỉ chọn firstMax là ô có piece */
+			/* nếu không thì kiểm tra xem 2 ô có phải là 2 ô liền kề hay không
+			 * 4 ô liền kề với ô firstMax là : (sq+1;sq-1;sq+8;sq-8) */
+			if(type == 0 || type==5)
+			{
+				if(firstMax.square >=0)
+				{
+					datamain[firstMax.square] = type+1;
+				}
 			}
-			if(secondMax.square >=0){
+			else if(secondMax.square==firstMax.square+1 || secondMax.square==firstMax.square-1
+					|| secondMax.square==firstMax.square+8 || secondMax.square==firstMax.square-8) // là ô liền kề
+			{
+				/* kiểm tra giá trị pulses của secondMax có >= firstMax*2/3 hay không
+				 * nếu vượt ngưỡng đó thì nó là 1 Piece không thì đó là nhiễu */
+				if(datapieces[type][secondMax.square][PULSES] >= datapieces[type][firstMax.square][PULSES]*2/3){
+					datamain[firstMax.square]=type+1;
+					datamain[secondMax.square]=type+1;
+				}else		// nếu không thì chỉ có 1 ô first là piece
+				{
+					datamain[firstMax.square]=type+1;
+				}
+			}
+			else	// nếu không phải là 2 ô liền kề thì cả 2 ô đều là Piece
+			{
+				datamain[firstMax.square] = type+1;
 				datamain[secondMax.square] = type+1;
 			}
 		}
@@ -233,32 +312,6 @@ bool DetectFenChange()
 		}
 	}
 	return resuft;
-}
-
-
-void FindMax(uint8_t type, SQData *sqFirstMax,SQData *sqSecondMax)
-{
-	// hàm tìm ra 2 ô có tín hiệu trong khoảng tần số và và số xung phản hồi đạt ngưỡng
-	sqFirstMax->pulses	= -1;	sqFirstMax->square 	= -1;
-	sqSecondMax->pulses = -2;	sqSecondMax->square = -2;
-	for(int sq=0;sq<64;sq++){
-		// số xung phải lớn hơn ngưỡng calibase
-		if(datapieces[type][sq][PULSES] >= getMarkSq(type, sq))
-		{	// period phải nằm trong khoảng của type piece
-			if(datapieces[type][sq][PERIOD] <= mark_period[type] && datapieces[type][sq][PERIOD] >mark_period[type+1])
-			{	// nếu NewValue >= FirstMax thì FirstMax = NewValue và SecondMax = FirstMax
-				if(datapieces[type][sq][PULSES] >= sqFirstMax->pulses){
-					sqSecondMax->pulses = sqFirstMax->pulses;
-					sqSecondMax->square = sqFirstMax->square;
-					sqFirstMax->pulses = datapieces[type][sq][PULSES];
-					sqFirstMax->square = sq;
-				}else if(datapieces[type][sq][PULSES] > sqSecondMax->pulses){ // nếu NewValue Chỉ > SecondMax thì SecondMax=NewValue
-					sqSecondMax->pulses = datapieces[type][sq][PULSES];
-					sqSecondMax->square = sq;
-				}
-			}
-		}
-	}
 }
 
 

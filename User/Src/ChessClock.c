@@ -6,10 +6,7 @@
  */
 
 #include "ChessClock.h"
-#include "Status.h"
-
 extern I2C_HandleTypeDef hi2c1;
-extern osSemaphoreId binarySemI2C_StatusHandle;
 
 bool chessclock_interrup = false;
 
@@ -59,13 +56,14 @@ void HAL_I2C_SlaveRxCpltCallback(I2C_HandleTypeDef *hi2c)
 // Handler I2C Error
 void HAL_I2C_ErrorCallback(I2C_HandleTypeDef *hi2c){
 	if(hi2c->Instance==I2C1){
-		i2c_code_error = hi2c->ErrorCode;
-		Status_Set(STT_I2C_ERROR);
+		HAL_NVIC_SystemReset();
+		/*i2c_code_error = hi2c->ErrorCode;
 		numerr++;
 		//HAL_NVIC_DisableIRQ(I2C1_ER_IRQn);
 		HAL_I2C_DeInit(&hi2c1);
 		MMX_I2C1_Init();
 		HAL_I2C_EnableListen_IT(&hi2c1);
+		*/
 	}
 }
 

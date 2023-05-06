@@ -1,9 +1,8 @@
-../User/Src/ScanPieces.c:42:6:HAL_TIM_PWM_PulseFinishedCallback	16	static
-../User/Src/ScanPieces.c:48:6:ScanPiecesInit	8	static
-../User/Src/ScanPieces.c:56:6:PulseOut	32	static
-../User/Src/ScanPieces.c:78:6:SelectReadCoil	16	static
-../User/Src/ScanPieces.c:98:6:Measure	32	static
-../User/Src/ScanPieces.c:171:12:Scan	48	static
-../User/Src/ScanPieces.c:220:9:FileRankToSquare	16	static
-../User/Src/ScanPieces.c:226:6:DetectFenChange	16	static
-../User/Src/ScanPieces.c:239:6:FindMax	40	static
+../User/Src/ScanPieces.c:36:6:HAL_TIM_PWM_PulseFinishedCallback	16	static
+../User/Src/ScanPieces.c:42:6:ScanPiecesInit	8	static
+../User/Src/ScanPieces.c:50:6:PulseOut	32	static
+../User/Src/ScanPieces.c:74:6:SelectReadCoil	16	static
+../User/Src/ScanPieces.c:89:6:Measure	32	static
+../User/Src/ScanPieces.c:194:12:Scan	88	static
+../User/Src/ScanPieces.c:298:9:FileRankToSquare	16	static
+../User/Src/ScanPieces.c:304:6:DetectFenChange	16	static

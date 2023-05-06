@@ -1,3 +1,0 @@
-../User/Src/Status.c:14:6:Status_Set	16	static
-../User/Src/Status.c:20:6:Led_Blink	24	static
-../User/Src/Status.c:30:6:Status_Task	8	static

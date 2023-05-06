@@ -1,0 +1,5 @@
+../User/Src/QueueData.c:8:8:QueueGetRear	4	static
+../User/Src/QueueData.c:23:8:QueueGetFront	4	static
+../User/Src/QueueData.c:29:6:QueueGetFrontAfter	4	static
+../User/Src/QueueData.c:36:9:QueueGetCount	4	static
+../User/Src/QueueData.c:40:6:QueueClear	4	static

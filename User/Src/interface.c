@@ -12,30 +12,25 @@
 #include "cmsis_os.h"
 #include "Utilities.h"
 #include "RtcRealTime.h"
+#include "QueueData.h"
 
-
-#define UART2_BUFFER_LENGTH	32
 #define UART1_BUFFER_LENGTH	32
 
-uint8_t data_mainpiece[64];
-uint8_t flag_masterGetData = 0;
-bool autoscan = false;
-
-extern uint8_t datamain[64];
-extern uint8_t datamain_old[64];
 extern USBD_HandleTypeDef hUsbDeviceFS;
 extern UART_HandleTypeDef huart1;
 extern DMA_HandleTypeDef hdma_usart1_rx;
 extern RTC_HandleTypeDef hrtc;
-
-
+extern uint8_t queueData[QUEUE_MAX][QUEUE_ITEMLENGTH];
+extern uint8_t datamain_old[64];
 extern uint8_t data_chessclock[15];
-extern bool mainChange;
 
-
-uint8_t compression_board[41]; // Address:3byte databoard:32byte + timePlay:4byte + switchClock:1byte + Newline:1byte
 uint8_t uart1_rx_buf[UART1_BUFFER_LENGTH];
 uint8_t uart1_data_length;
+// new
+uint8_t globalMode = MODE_REVIEW;
+uint32_t lastCmdReview = 0;
+bool flagReviewFullData = true;
+
 
 #ifdef CALIBASE
 	uint8_t calibase_type=0;  // đặt type piece trong chế độ calibase
@@ -44,39 +39,20 @@ uint8_t uart1_data_length;
 	uint8_t dataUsbCalibase[263];
 	extern uint16_t datapieces[18][64][2];  	// 18-type 	64-square	2-period+length
 	extern uint8_t datamain[64];				// chứa dữ liệu chính của pieces
-	extern RTC_HandleTypeDef hrtc;
-	extern USBD_HandleTypeDef hUsbDeviceFS;
 #endif
 
 void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size){
 	if(huart->Instance==USART1){
-		//memcpy(uart1_main_buf,uart1_rx_buf,UART1_BUFFER_LENGTH);
 		uart1_data_length=Size;
-		//AnalyserCMD(uart1_main_buf,uart1_data_length, RS485);
 		AnalyserCMD(uart1_rx_buf,uart1_data_length, RS485);
 		HAL_UARTEx_ReceiveToIdle_DMA(&huart1, uart1_rx_buf, UART1_BUFFER_LENGTH);
 	}
-#ifdef USING_BLUETOOTH
-	else if(huart->Instance==USART2){
-			memcpy(uart2_main_buf,uart2_rx_buf,UART2_BUFFER_LENGTH);
-			uart2_onData=true;
-			uart2_data_length=Size;
-			HAL_UARTEx_ReceiveToIdle_DMA(&huart2, uart2_rx_buf, UART2_BUFFER_LENGTH);
-	}
-#endif
 }
 
 void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart){
 	if(huart->Instance==USART1){
-		//uart1_error = HAL_UART_GetError(&huart1);
 		HAL_NVIC_SystemReset();
 	}
-#ifdef USING_BLUETOOTH
-	else if(huart->Instance==USART2){
-		uart2_error = HAL_UART_GetError(&huart2);
-	}
-#endif
-
 }
 
 void initReceiverUart(){
@@ -163,23 +139,28 @@ void AnalyserCMD(uint8_t *data,uint8_t length,TypeConnection typeconnect )
 		if(crcval[0] != data[11] || crcval[1] != data[12]) return;
 	}
 
-
 	if(data[4]==CMD_CHECKBOARD)
 	{
 		Response_CheckAddress(typeconnect);
-	}else if(data[4]==CMD_GETBOARDDATA)
+	}else if(data[4]==CMD_GETBOARDREVIEW)
 	{
-		Responce_GetBoardData(true,typeconnect);
-	}else if(data[4] == CMD_GETBOARDDATAFULL)
+		globalMode  = MODE_REVIEW;
+		if(HAL_GetTick()- lastCmdReview >1000){
+			flagReviewFullData = true;
+		}
+		lastCmdReview = HAL_GetTick();
+		Responce_GetBoardReview(typeconnect);
+	}else if(data[4] == CMD_GETBOARDRECORDING)
 	{
-		Responce_GetBoardData(false, typeconnect);
+		if(globalMode==MODE_REVIEW) // nếu mode trước đó là review thì clear queue data
+		{
+			QueueClear();
+		}
+		globalMode = MODE_RECORDING;
+		Responce_GetBoardRecording(typeconnect);
 	}else if(data[4] == CMD_SETTIMERTC)
 	{
 		Responce_SetTimeRTC(data);
-	}else if(data[4] == CMD_SETAUTOSCANON){
-		autoscan = true;
-	}else if(data[4] == CMD_SETAUTOSCANOFF){
-		autoscan = false;
 	}else if(data[4] >= CMD_GETGAMESAVEBASE){
 		Responce_GetDataGameSave(typeconnect,data[4]-CMD_GETGAMESAVEBASE);
 	}else if(data[4] == CMD_ERASEALLGAME){
@@ -209,23 +190,19 @@ void Response_CheckAddress(TypeConnection typeconnect)
 
 	}
 }
-/* autoSend==true : chỉ gửi dữ liệu khi có sự thay đổi (mainChange==true)
- * 					nếu mainChange==false thì gửi lại Response thôi
- * autoSend==false : gửi toàn bộ dữ liệu bất chấp mainChange */
-void Responce_GetBoardData(bool autoSend, TypeConnection typeconnect)
-{
+void Responce_GetBoardReview(TypeConnection typeconnect) {
 	uint8_t data[53];
-	uint8_t pieceA,pieceB,pie=0;
 	uint16_t crc;
-
+	uint8_t pieceA,pieceB,pie=0;
 	data[0] = CMD_BEGIN;
 	data[1] = ADDRESSBOARD_PART0;
 	data[2] = ADDRESSBOARD_PART1;
 	data[3] = ADDRESSBOARD_PART2;
-	data[4] = CMD_GETBOARDDATA;
-	if(mainChange==true || autoSend==false)
-	{
-	/* gắn datamain vào 32 byte tiếp theo */
+	data[4] = RES_DATAFENCHANGE;
+
+	if (flagReviewFullData == true) {
+		flagReviewFullData = false;
+		/* gắn datamain vào 32 byte tiếp theo */
 		for(int i=0;i<32;i++){
 			pieceA = byteToPiece(datamain_old[pie]);
 			pie++;
@@ -233,32 +210,67 @@ void Responce_GetBoardData(bool autoSend, TypeConnection typeconnect)
 			pie++;
 			data[i+5]=(pieceA<<4)+pieceB;
 		}
-		for(int i=0;i<14;i++){
+		for(int i=0;i<14;i++)
+		{
 			data[37+i] = data_chessclock[i];
 		}
 		crc = CalculateCRC(data, 1, 50);
-		data[51] = (uint8_t)((crc &0xFF00)>>8);
-		data[52] = (uint8_t)(crc &0x00FF);
-		/* Send Data*/
-		if(typeconnect ==RS485){
-			HAL_UART_Transmit(&huart1, data, 53,2000);
-		}else if(typeconnect == USB){
+			data[51] = (uint8_t)((crc &0xFF00)>>8);
+			data[52] = (uint8_t)(crc &0x00FF);
+		if (typeconnect == RS485) {
+			HAL_UART_Transmit(&huart1, data, 53, 1000);
+		} else if (typeconnect == USB) {
 			CDC_Transmit_FS(data, 53);
-		}else if(typeconnect == BLE){
+		} else if (typeconnect == BLE) {
 
 		}
-		mainChange=false;
-	}else
-	{
+	}else {
 		crc = CalculateCRC(data, 1, 4);
-		data[5] = (uint8_t)((crc &0xFF00)>>8);
-		data[6] = (uint8_t)(crc &0x00FF);
+		data[5] = (uint8_t) ((crc & 0xFF00) >> 8);
+		data[6] = (uint8_t) (crc & 0x00FF);
 		/* Send Data*/
-		if(typeconnect ==RS485){
-			HAL_UART_Transmit(&huart1, data, 7,1000);
-		}else if(typeconnect == USB){
+		if (typeconnect == RS485) {
+			HAL_UART_Transmit(&huart1, data, 7, 1000);
+		} else if (typeconnect == USB) {
 			CDC_Transmit_FS(data, 7);
-		}else if(typeconnect == BLE){
+		} else if (typeconnect == BLE) {
+
+		}
+	}
+}
+
+void Responce_GetBoardRecording(TypeConnection typeconnect)
+{
+	if (QueueGetCount() > 0) {
+		uint8_t front = QueueGetFront();
+		if (typeconnect == RS485) {
+			HAL_UART_Transmit(&huart1, queueData[front], 53, 1000);
+		} else if (typeconnect == USB) {
+			CDC_Transmit_FS(queueData[front], 53);
+		} else if (typeconnect == BLE) {
+
+		}
+		QueueGetFrontAfter();
+	}else if(flagReviewFullData){
+		Responce_GetBoardReview(typeconnect);
+	} else {
+		uint8_t data[53];
+		uint16_t crc;
+
+		data[0] = CMD_BEGIN;
+		data[1] = ADDRESSBOARD_PART0;
+		data[2] = ADDRESSBOARD_PART1;
+		data[3] = ADDRESSBOARD_PART2;
+		data[4] = CMD_GETBOARDDATA;
+		crc = CalculateCRC(data, 1, 4);
+		data[5] = (uint8_t) ((crc & 0xFF00) >> 8);
+		data[6] = (uint8_t) (crc & 0x00FF);
+		/* Send Data*/
+		if (typeconnect == RS485) {
+			HAL_UART_Transmit(&huart1, data, 7, 1000);
+		} else if (typeconnect == USB) {
+			CDC_Transmit_FS(data, 7);
+		} else if (typeconnect == BLE) {
 
 		}
 	}
@@ -342,15 +354,12 @@ void UsbSendDataCalibase()
 		dataUsbCalibase[260] = sDate.Month;
 		dataUsbCalibase[261] = sDate.Year;
 
-
-
 		dataUsbCalibase[262]=255;
 		if(typeCalibaseConnect==USB){
 			CDC_Transmit_FS(dataUsbCalibase,263);
 		}else if(typeCalibaseConnect==RS485){
 			HAL_UART_Transmit(&huart1, dataUsbCalibase, 263, 1000);
 		}
-
 	}
 #endif
 
