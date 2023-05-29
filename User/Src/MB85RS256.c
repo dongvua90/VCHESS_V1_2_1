@@ -6,6 +6,7 @@
  */
 #include "MB85RS256.h"
 #include "stdio.h"
+#include "ChessClock.h"
 
 #define MB85RS_CS_LOW 	HAL_GPIO_WritePin(SPI_CS_GPIO_Port, SPI_CS_Pin, GPIO_PIN_RESET)
 #define MB85RS_CS_HIGH 	HAL_GPIO_WritePin(SPI_CS_GPIO_Port, SPI_CS_Pin, GPIO_PIN_SET)
@@ -165,11 +166,22 @@ void MB85RS_saveFen(){
 	MB85RS_WritePointSave();
 }
 
+uint8_t oldSide = SIDE_WHITE;
+uint16_t recorded = 0;
+
 void handlerMb85rs() {
-	if (data_chessclock[9] == 1) { //CLOCKSTATUS { READY=0,BEGIN_PLAY=1,PLAYING=2,PLAY_TO_PAUSE=3,PAUSE_TO_PLAY=4,ONE_SIDE_OVER_TIME=5,ALL_SIDE_OVER_TIME=6 };
+	/* Do chessclock cập nhật trạng thái mỗi 5s nên cần bỏ qua trạng thái này  */
+	 //CLOCKSTATUS { READY=0,BEGIN_PLAY=1,PLAYING=2,PLAY_TO_PAUSE=3,PAUSE_TO_PLAY=4,ONE_SIDE_OVER_TIME=5,ALL_SIDE_OVER_TIME=6 };
+	if (data_chessclock[9] == 1) {
 		MB85RS_WriteNewGame();
-	} else if (data_chessclock[9] == 2) {
-		MB85RS_saveFen();
+		oldSide = data_chessclock[8] & 0x01;
+	} else if (data_chessclock[9] == 2 || data_chessclock[9] ==4 || data_chessclock[9] == 5 || data_chessclock[9]==6) {
+		uint8_t newSide = data_chessclock[8] & 0x01;
+		if(newSide != oldSide){
+			recorded++;
+			oldSide = newSide;
+			MB85RS_saveFen();
+		}
 	}
 }
 

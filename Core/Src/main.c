@@ -21,6 +21,7 @@
 #include "cmsis_os.h"
 #include "dma.h"
 #include "i2c.h"
+#include "iwdg.h"
 #include "rtc.h"
 #include "spi.h"
 #include "tim.h"
@@ -119,12 +120,16 @@ int main(void)
   MX_SPI1_Init();
   MX_USART1_UART_Init();
   MX_RTC_Init();
+  MX_IWDG_Init();
   /* USER CODE BEGIN 2 */
-  LED_ON;
-  HAL_Delay(1000);
-  LED_OFF;
+  // led nhay bao hieu khoi dong
+  for(int i=0;i<3;i++){
+	LED_ON;
+	HAL_Delay(100);
+	LED_OFF;
+	HAL_Delay(100);
+  }
   initReceiverUart();
-  //TaskScanPieceInit();
   /* USER CODE END 2 */
 
   /* Call init function for freertos objects (in freertos.c) */
@@ -165,9 +170,11 @@ void SystemClock_Config(void)
   /** Initializes the RCC Oscillators according to the specified parameters
   * in the RCC_OscInitTypeDef structure.
   */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE|RCC_OSCILLATORTYPE_LSE;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_LSI|RCC_OSCILLATORTYPE_HSE
+                              |RCC_OSCILLATORTYPE_LSE;
   RCC_OscInitStruct.HSEState = RCC_HSE_ON;
   RCC_OscInitStruct.LSEState = RCC_LSE_ON;
+  RCC_OscInitStruct.LSIState = RCC_LSI_ON;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
   RCC_OscInitStruct.PLL.PLLM = 25;
@@ -236,6 +243,7 @@ void Error_Handler(void)
   __disable_irq();
   while (1)
   {
+	  HAL_NVIC_SystemReset();
   }
   /* USER CODE END Error_Handler_Debug */
 }

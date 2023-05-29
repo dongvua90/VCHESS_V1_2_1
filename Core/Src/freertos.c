@@ -52,7 +52,7 @@
 /* USER CODE END Variables */
 osThreadId defaultTaskHandle;
 osThreadId taskScanPieceHandle;
-uint32_t taskScanPieceBuffer[ 2048 ];
+uint32_t taskScanPieceBuffer[ 4096 ];
 osStaticThreadDef_t taskScanPieceControlBlock;
 osSemaphoreId binarySemGetFRAMHandle;
 osSemaphoreId binarySemMasterGetDataHandle;
@@ -126,11 +126,11 @@ void MX_FREERTOS_Init(void) {
 
   /* Create the thread(s) */
   /* definition and creation of defaultTask */
-  osThreadDef(defaultTask, StartDefaultTask, osPriorityRealtime, 0, 128);
+  osThreadDef(defaultTask, StartDefaultTask, osPriorityRealtime, 0, 512);
   defaultTaskHandle = osThreadCreate(osThread(defaultTask), NULL);
 
   /* definition and creation of taskScanPiece */
-  osThreadStaticDef(taskScanPiece, StartTaskScanPiece, osPriorityHigh, 0, 2048, taskScanPieceBuffer, &taskScanPieceControlBlock);
+  osThreadStaticDef(taskScanPiece, StartTaskScanPiece, osPriorityHigh, 0, 4096, taskScanPieceBuffer, &taskScanPieceControlBlock);
   taskScanPieceHandle = osThreadCreate(osThread(taskScanPiece), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
@@ -145,8 +145,8 @@ void MX_FREERTOS_Init(void) {
   * @param  argument: Not used
   * @retval None
   */
-uint8_t cmd_test=0;
-
+extern uint8_t ping_chessclock;
+extern uint8_t data_chessclock[15];
 /* USER CODE END Header_StartDefaultTask */
 void StartDefaultTask(void const * argument)
 {
@@ -158,7 +158,17 @@ void StartDefaultTask(void const * argument)
   /* Infinite loop */
   for(;;)
   {
-	  osDelay(1);
+	  // kiểm tra trạng thái kết nối với đồng hồ qua I2C
+	  osDelay(1000);
+	  if(ping_chessclock > 0) {
+		  ping_chessclock--;
+	  }
+	  /* ping_chessclock sẽ đếm ngược đến 0
+	   * khi nó đếm đến 0 sẽ set chessclock status = disconnect */
+	  if(ping_chessclock==0){
+		  data_chessclock[9]=STATUS_DISCONNECT_CLOCK;
+		  HAL_NVIC_SystemReset();
+	  }
   }
   /* USER CODE END StartDefaultTask */
 }

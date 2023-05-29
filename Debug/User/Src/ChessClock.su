@@ -1,7 +1,6 @@
-../User/Src/ChessClock.c:20:9:Checksum	24	static
-../User/Src/ChessClock.c:31:6:HAL_I2C_AddrCallback	16	static
-../User/Src/ChessClock.c:42:6:HAL_I2C_ListenCpltCallback	16	static
-../User/Src/ChessClock.c:46:6:HAL_I2C_SlaveRxCpltCallback	16	static
-../User/Src/ChessClock.c:57:6:HAL_I2C_ErrorCallback	16	static
+../User/Src/ChessClock.c:26:9:Checksum	24	static
+../User/Src/ChessClock.c:37:6:HAL_I2C_AddrCallback	16	static
+../User/Src/ChessClock.c:48:6:HAL_I2C_ListenCpltCallback	16	static
+../User/Src/ChessClock.c:52:6:HAL_I2C_SlaveRxCpltCallback	16	static
+../User/Src/ChessClock.c:64:6:HAL_I2C_ErrorCallback	16	static
 ../User/Src/ChessClock.c:70:6:ChessClock_Init	8	static
-../User/Src/ChessClock.c:75:13:MMX_I2C1_Init	8	static

@@ -13,6 +13,7 @@
 #include "Utilities.h"
 #include "RtcRealTime.h"
 #include "QueueData.h"
+#include "ChessClock.h"
 
 #define UART1_BUFFER_LENGTH	32
 
@@ -183,7 +184,9 @@ void Response_CheckAddress(TypeConnection typeconnect)
 	data[6] = (uint8_t)(crc & 0x00FF);
 
 	if(typeconnect ==RS485){
+		RS485_TX_ENA;
 		HAL_UART_Transmit(&huart1, data, 7,1000);
+		RS485_TX_DIS;
 	}else if(typeconnect == USB){
 		CDC_Transmit_FS(data, 7);
 	}else if(typeconnect == BLE){
@@ -198,7 +201,11 @@ void Responce_GetBoardReview(TypeConnection typeconnect) {
 	data[1] = ADDRESSBOARD_PART0;
 	data[2] = ADDRESSBOARD_PART1;
 	data[3] = ADDRESSBOARD_PART2;
-	data[4] = RES_DATAFENCHANGE;
+	if(data_chessclock[9]==STATUS_DISCONNECT_CLOCK){
+		data[4] = RES_CHESSCLOCK_DISCONECTED;
+	}else{
+		data[4] = RES_DATAFENCHANGE;
+	}
 
 	if (flagReviewFullData == true) {
 		flagReviewFullData = false;
@@ -218,7 +225,9 @@ void Responce_GetBoardReview(TypeConnection typeconnect) {
 			data[51] = (uint8_t)((crc &0xFF00)>>8);
 			data[52] = (uint8_t)(crc &0x00FF);
 		if (typeconnect == RS485) {
+			RS485_TX_ENA;
 			HAL_UART_Transmit(&huart1, data, 53, 1000);
+			RS485_TX_DIS;
 		} else if (typeconnect == USB) {
 			CDC_Transmit_FS(data, 53);
 		} else if (typeconnect == BLE) {
@@ -230,7 +239,9 @@ void Responce_GetBoardReview(TypeConnection typeconnect) {
 		data[6] = (uint8_t) (crc & 0x00FF);
 		/* Send Data*/
 		if (typeconnect == RS485) {
+			RS485_TX_ENA;
 			HAL_UART_Transmit(&huart1, data, 7, 1000);
+			RS485_TX_DIS;
 		} else if (typeconnect == USB) {
 			CDC_Transmit_FS(data, 7);
 		} else if (typeconnect == BLE) {
@@ -244,7 +255,9 @@ void Responce_GetBoardRecording(TypeConnection typeconnect)
 	if (QueueGetCount() > 0) {
 		uint8_t front = QueueGetFront();
 		if (typeconnect == RS485) {
+			RS485_TX_ENA;
 			HAL_UART_Transmit(&huart1, queueData[front], 53, 1000);
+			RS485_TX_DIS;
 		} else if (typeconnect == USB) {
 			CDC_Transmit_FS(queueData[front], 53);
 		} else if (typeconnect == BLE) {
@@ -267,7 +280,9 @@ void Responce_GetBoardRecording(TypeConnection typeconnect)
 		data[6] = (uint8_t) (crc & 0x00FF);
 		/* Send Data*/
 		if (typeconnect == RS485) {
+			RS485_TX_ENA;
 			HAL_UART_Transmit(&huart1, data, 7, 1000);
+			RS485_TX_DIS;
 		} else if (typeconnect == USB) {
 			CDC_Transmit_FS(data, 7);
 		} else if (typeconnect == BLE) {
@@ -291,7 +306,9 @@ void Responce_GetDataGameSave(TypeConnection typeconnect,uint8_t part)
 	MB85RS_read(part*GAMESAVELENGTH, data, GAMESAVELENGTH);
 
 	if(typeconnect ==RS485){
+		RS485_TX_ENA;
 			HAL_UART_Transmit(&huart1, data, GAMESAVELENGTH, 1000);
+		RS485_TX_DIS;
 	}else if(typeconnect == USB){
 		CDC_Transmit_FS(data, GAMESAVELENGTH);
 	}else if(typeconnect == BLE){
@@ -358,7 +375,9 @@ void UsbSendDataCalibase()
 		if(typeCalibaseConnect==USB){
 			CDC_Transmit_FS(dataUsbCalibase,263);
 		}else if(typeCalibaseConnect==RS485){
+			RS485_TX_ENA;
 			HAL_UART_Transmit(&huart1, dataUsbCalibase, 263, 1000);
+			RS485_TX_DIS;
 		}
 	}
 #endif

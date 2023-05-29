@@ -57,8 +57,8 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
-#define BLE_STA_Pin GPIO_PIN_0
-#define BLE_STA_GPIO_Port GPIOA
+#define RS485_TX_EN_Pin GPIO_PIN_0
+#define RS485_TX_EN_GPIO_Port GPIOA
 #define BLE_PWRC_Pin GPIO_PIN_1
 #define BLE_PWRC_GPIO_Port GPIOA
 #define SPI_CS_Pin GPIO_PIN_4
@@ -73,14 +73,16 @@ void Error_Handler(void);
 #define CD4051_C_GPIO_Port GPIOB
 #define IC_IN_TIM4_CH2_Pin GPIO_PIN_7
 #define IC_IN_TIM4_CH2_GPIO_Port GPIOB
+/* USER CODE BEGIN Private defines */
 #define LED_ON 	HAL_GPIO_WritePin(LED_STATUS_GPIO_Port, LED_STATUS_Pin, GPIO_PIN_SET)
 #define LED_OFF HAL_GPIO_WritePin(LED_STATUS_GPIO_Port, LED_STATUS_Pin, GPIO_PIN_RESET);
-/* USER CODE BEGIN Private defines */
+#define RS485_TX_ENA HAL_GPIO_WritePin(RS485_TX_EN_GPIO_Port, RS485_TX_EN_Pin, GPIO_PIN_SET);
+#define RS485_TX_DIS HAL_GPIO_WritePin(RS485_TX_EN_GPIO_Port, RS485_TX_EN_Pin, GPIO_PIN_RESET);
 #define CALIBASE
 #define ADDRESSBOARD
 #define ADDRESSBOARD_PART0 0
 #define ADDRESSBOARD_PART1 0
-#define ADDRESSBOARD_PART2 5
+#define ADDRESSBOARD_PART2 36
 
 #define ADDR_PART0	 ADDRESSBOARD/64516
 #define ADDR_PART1	(ADDRESSBOARD-ADDR_PART0*64516)/254

@@ -43,7 +43,6 @@ void PushData(bool isClockChanged);
  * 		- board sẽ chỉ scan khi chessclock_side thay đổi sau đó trả về fulldata */
 
 void StartTaskScanPiece(void const *argument) {
-	osDelay(1000);
 	ScanPiecesInit();
 	MB85RS_getPointSave();
 	while (1) {
@@ -60,6 +59,7 @@ void StartTaskScanPiece(void const *argument) {
 		if (isCalibaseMode == true) {
 			Scan(false);
 			UsbSendDataCalibase();
+			IWDG->KR=0xAAAA;// Reload Counter Watchdog
 			osDelay(1);
 		} else
 #endif
@@ -76,6 +76,7 @@ void StartTaskScanPiece(void const *argument) {
 				handlerMb85rs();
 				LED_OFF;
 			}
+			IWDG->KR=0xAAAA;// Reload Counter Watchdog
 			osDelay(500);
 		} else if (globalMode == MODE_RECORDING) {
 			if (chessclock_interrup) {
@@ -98,6 +99,7 @@ void StartTaskScanPiece(void const *argument) {
 					}
 				}
 			}
+			IWDG->KR=0xAAAA;// Reload Counter Watchdog
 		}
 		osDelay(1);
 #endif

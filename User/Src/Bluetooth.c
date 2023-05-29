@@ -20,10 +20,10 @@ void BLE_PowerOff()
 void BLE_Send(uint8_t *data,uint8_t size)
 {
 	// send only when connected
-	if(HAL_GPIO_ReadPin(BLE_STA_GPIO_Port, BLE_STA_Pin)==GPIO_PIN_SET)
-	{
-		HAL_UART_Transmit(&huart2, data, size, 1000);
-	}
+//	if(HAL_GPIO_ReadPin(BLE_STA_GPIO_Port, BLE_STA_Pin)==GPIO_PIN_SET)
+//	{
+//		HAL_UART_Transmit(&huart2, data, size, 1000);
+//	}
 }
 
 

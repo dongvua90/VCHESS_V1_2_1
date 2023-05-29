@@ -2,13 +2,14 @@
 
 //										0		1		2		3		4		5		6		7		8		9		10		11		12		13		14		15		16		17
 const uint16_t ListFrequency[18]	={  90,		96,  	103,  	110,  	118,  	130,  	140,  	151,  	165,  	180,  	200,  	220,  	242,  	265,  	295,   	320,   	345,  	370};
-const uint8_t ListLengthOut[18]		={  10,	 	10,  	10,		10,	  	10,		10,	  	8,		8,	  	5,		7,	   	7,	 	8,    	8,	 	10,    	10,	  	10,	  	12,   	12};
+const uint8_t ListLengthOut[18]		={  10,	 	10,  	10,		10,	  	10,		10,	  	6,		5,	  	5,		7,	   	6,	 	8,    	8,	 	10,    	10,	  	10,	  	12,   	12};
 // gia tri period chuan :       	 		933  	873   	813   	763   	713   	648   	602   	556   	510   	466   	421   	381   	347   	317   	285   	262   	243   	227
-const uint16_t mark_period[19] 		={	950,  	903,  	833,  	788,  	738,  	681,  	620,  	570,  	533,  	480,  	430,  	401,  	364,  	327,  	301,  	273,  	253,  	230,  	200};
+const uint16_t mark_period_max[18] 	={	950,  	903,  	843,  	788,  	738,  	681,  	620,  	570,  	533,  	480,  	430,  	401,  	364,  	327,  	301,  	283,  	253,  	230};
+const uint16_t mark_period_min[18] 	={	903,  	843,  	788,  	738,  	681,  	620,  	570,  	533,  	480,  	430,  	401,  	364,  	327,  	301,  	240,  	220,  	200,  	180};
 //                                   	K      	Q     	B    	N     	R     	k     	q     	b     	n     	r     	p1    	p2    	p3    	p4    	P1    	P2    	P3    	P4
-const uint16_t ListIC_measure[18]  	={	30000,	40000,	27000,	26000,	25000,	24000,	23000,	22000,	32000,	22000, 	22000,	22000,	22000,	22000,	12000,	12000,	12000,	12000};
+const uint16_t ListIC_measure[18]  	={	37000,	43000,	34000,	32000,	25000,	25000,	24000,	25000,	32000,	28000, 	25000,	15000,	15000,	14000,	11000,	10000,	10000,	10000};
 const uint8_t offsetMeasure[18]		={	1,		5,		5,		5,		5,		1,		5,		5,		5,		5,		5,		5,		5,		5,		5,		5,		5,		5};
-const uint8_t sttscan[18] 			={0,1,2,3,4,5,6,7,8,9,10,11,12,13,15,16,14,17}; // stt scan piece type
+const uint8_t sttscan[18] 			={0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17}; // stt scan piece type
 const uint8_t sttInOut[8] 			={1,4,7,2,5,8,3,6};								// stt output pulse & input coil
 
 extern TIM_HandleTypeDef htim1;
@@ -111,8 +112,9 @@ void Measure(uint8_t type,uint8_t outCoil,uint8_t readCoil)
 
     /* chờ cho quá trình đo PWM hoàn thành */
 	while(is_start_measure){
-		/*	Kiểm tra liên tục xem có xung phản hồi hay không? nếu không thì dừng quá trình đo lại luôn để tiết kiệm thời gian	*/
-		if(firstcheck){
+		/*	Kiểm tra liên tục xem có xung phản hồi hay không? nếu không thì dừng quá trình đo lại luôn để tiết kiệm thời gian
+		 * khi quét ô cuối cùng thì không bỏ qua quá trình scan vì nó sẽ gây nhiễu đến piece type sau đó */
+		if(firstcheck && outCoil!=sttInOut[7] && readCoil!=sttInOut[7]){
 			if(TIM4->CNT > (period*18)){
 				if(inputCapture_data[10]==0){
 					/* Nếu không có xung phản hồi thì reset biến và đặt lại timer */
@@ -174,7 +176,7 @@ void Measure(uint8_t type,uint8_t outCoil,uint8_t readCoil)
 		responce_period = (inputCapture_data[startmeasure+offsetMeasure[type]+RANGE_MEASURE] - inputCapture_data[startmeasure + offsetMeasure[type]]) / RANGE_MEASURE;
 	}
 #ifdef ONLYTYPE
-	if(responce_period <= mark_period[type] && responce_period >mark_period[type+1]){
+	if(responce_period <= mark_period_max[type] && responce_period >mark_period_min[type]){
 		datapieces[type][sq][PULSES]=responce_length;
 		datapieces[type][sq][PERIOD]=responce_period;
 	}else{
@@ -219,6 +221,7 @@ SCANRESULT Scan(bool enableClockSideInterrup)
 				uint8_t sq = FileRankToSquare(outCoil, readCoil);
 				if(datamain[sq]==0){  // nếu ô quét chưa thấy piece nào thì tiến hành đo đạc
 					Measure(type,outCoil,readCoil);
+
 				}
 			}
 		}
@@ -229,7 +232,7 @@ SCANRESULT Scan(bool enableClockSideInterrup)
 		for (int8_t sq = 0; sq < 64; sq++) {
 			// số xung phải lớn hơn ngưỡng calibase
 			if (datapieces[type][sq][PULSES] >= getMarkSq(type, sq)) {// period phải nằm trong khoảng của type piece
-				if (datapieces[type][sq][PERIOD] <= mark_period[type] && datapieces[type][sq][PERIOD] > mark_period[type + 1])
+				if (datapieces[type][sq][PERIOD] <= mark_period_max[type] && datapieces[type][sq][PERIOD] > mark_period_min[type])
 				{
 					sqDetects[lengthValid] = sq;
 					lengthValid++;
@@ -270,6 +273,7 @@ SCANRESULT Scan(bool enableClockSideInterrup)
 					datamain[firstMax.square] = type+1;
 				}
 			}
+#ifdef USING_ADJACENT
 			else if(secondMax.square==firstMax.square+1 || secondMax.square==firstMax.square-1
 					|| secondMax.square==firstMax.square+8 || secondMax.square==firstMax.square-8) // là ô liền kề
 			{
@@ -283,6 +287,7 @@ SCANRESULT Scan(bool enableClockSideInterrup)
 					datamain[firstMax.square]=type+1;
 				}
 			}
+#endif
 			else	// nếu không phải là 2 ô liền kề thì cả 2 ô đều là Piece
 			{
 				datamain[firstMax.square] = type+1;
