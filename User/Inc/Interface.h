@@ -45,7 +45,7 @@ void RoamingData();
 uint8_t byteToPiece(uint8_t piece);
 
 // new
-void AnalyserCMD(uint8_t *data,uint8_t length,TypeConnection typeconnect );
+void AnalyserCMD(uint8_t *data,uint16_t length,TypeConnection typeconnect );
 void Response_CheckAddress(TypeConnection typeconnect);
 void Responce_GetBoardReview(TypeConnection typeconnect);
 void Responce_GetBoardRecording(TypeConnection typeconnect);
@@ -56,5 +56,6 @@ void Responce_EraseGameSave();
 
 void UsbSendDateTime();
 void UsbSendDataCalibase();
+
 
 #endif /* INC_INTERFACE_H_ */

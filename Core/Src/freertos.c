@@ -169,6 +169,7 @@ void StartDefaultTask(void const * argument)
 		  data_chessclock[9]=STATUS_DISCONNECT_CLOCK;
 		  HAL_NVIC_SystemReset();
 	  }
+
   }
   /* USER CODE END StartDefaultTask */
 }

@@ -3,6 +3,6 @@
 ../User/Src/ScanPieces.c:51:6:PulseOut	32	static
 ../User/Src/ScanPieces.c:75:6:SelectReadCoil	16	static
 ../User/Src/ScanPieces.c:90:6:Measure	32	static
-../User/Src/ScanPieces.c:196:12:Scan	88	static
-../User/Src/ScanPieces.c:304:9:FileRankToSquare	16	static
-../User/Src/ScanPieces.c:310:6:DetectFenChange	16	static
+../User/Src/ScanPieces.c:210:12:Scan	80	static
+../User/Src/ScanPieces.c:318:9:FileRankToSquare	16	static
+../User/Src/ScanPieces.c:324:6:DetectFenChange	16	static

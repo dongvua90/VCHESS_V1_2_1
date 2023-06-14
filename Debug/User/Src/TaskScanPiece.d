@@ -69,7 +69,8 @@ User/Src/TaskScanPiece.o: ../User/Src/TaskScanPiece.c ../Core/Inc/main.h \
  ../Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_ioreq.h \
  ../Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_ctlreq.h \
  C:/Users/dongv/Documents/STM32CUBE_IDE/VCHESS_V1.2.1/User/Inc/QueueData.h \
- C:/Users/dongv/Documents/STM32CUBE_IDE/VCHESS_V1.2.1/User/Inc/Utilities.h
+ C:/Users/dongv/Documents/STM32CUBE_IDE/VCHESS_V1.2.1/User/Inc/Utilities.h \
+ C:/Users/dongv/Documents/STM32CUBE_IDE/VCHESS_V1.2.1/User/Inc/calibase.h
 ../Core/Inc/main.h:
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h:
 ../Core/Inc/stm32f4xx_hal_conf.h:
@@ -142,3 +143,4 @@ C:/Users/dongv/Documents/STM32CUBE_IDE/VCHESS_V1.2.1/User/Inc/MB85RS256.h:
 ../Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_ctlreq.h:
 C:/Users/dongv/Documents/STM32CUBE_IDE/VCHESS_V1.2.1/User/Inc/QueueData.h:
 C:/Users/dongv/Documents/STM32CUBE_IDE/VCHESS_V1.2.1/User/Inc/Utilities.h:
+C:/Users/dongv/Documents/STM32CUBE_IDE/VCHESS_V1.2.1/User/Inc/calibase.h:

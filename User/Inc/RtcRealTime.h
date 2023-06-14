@@ -26,5 +26,7 @@
 					(relative to 1980)
  * */
 void RTC_SetTime(uint8_t *dat);
+void BackupError_write(uint8_t error);
+uint8_t BackupError_read();
 
 #endif /* INC_RTCREALTIME_H_ */

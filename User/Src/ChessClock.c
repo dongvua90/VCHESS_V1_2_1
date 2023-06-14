@@ -6,11 +6,11 @@
  */
 
 #include "ChessClock.h"
+#include "RtcRealTime.h"
 extern I2C_HandleTypeDef hi2c1;
 
 bool chessclock_interrup = false;
 
-static void MMX_I2C1_Init(void);
 
 uint8_t data_chessclock[15];
 uint32_t i2c_code_error;
@@ -22,6 +22,7 @@ uint8_t crcval=0;
  * 		- set ping=7 khi có data từ chessclock gửi về để reset biến đếm
  * 	chu kỳ chessclock gửi tín hiệu về là 5s */
 uint8_t ping_chessclock=7;
+extern uint8_t sys_error;
 
 uint8_t Checksum(uint8_t *data, uint8_t length)
 {
@@ -63,6 +64,22 @@ void HAL_I2C_SlaveRxCpltCallback(I2C_HandleTypeDef *hi2c)
 // Handler I2C Error
 void HAL_I2C_ErrorCallback(I2C_HandleTypeDef *hi2c){
 	if(hi2c->Instance==I2C1){
+		//HAL_NVIC_SystemReset();
+		uint32_t i2c_error = HAL_I2C_GetError(&hi2c1);
+		switch(i2c_error){
+		case HAL_I2C_ERROR_BERR: sys_error = BOARD_I2C_ERROR_BERR;	break;
+		case HAL_I2C_ERROR_ARLO: sys_error = BOARD_I2C_ERROR_ARLO;	break;
+		case HAL_I2C_ERROR_AF:	 sys_error = BOARD_I2C_ERROR_AF;	break;
+		case HAL_I2C_ERROR_OVR:	 sys_error = BOARD_I2C_ERROR_OVR;	break;
+		case HAL_I2C_ERROR_DMA:	 sys_error = BOARD_I2C_ERROR_DMA;	break;
+		case HAL_I2C_ERROR_TIMEOUT: sys_error = BOARD_I2C_ERROR_TIMEOUT;	break;
+		case HAL_I2C_ERROR_SIZE:	sys_error = BOARD_I2C_ERROR_SIZE;	break;
+		case HAL_I2C_ERROR_DMA_PARAM: sys_error = BOARD_I2C_ERROR_DMA_PARAM; break;
+		case HAL_I2C_WRONG_START:	sys_error = BOARD_I2C_WRONG_START; break;
+		default: sys_error = BOARD_SYS_ERROR; break;
+		}
+		BackupError_write(sys_error);
+		HAL_Delay(100);
 		HAL_NVIC_SystemReset();
 	}
 }
@@ -71,33 +88,3 @@ void ChessClock_Init()
 {
 	HAL_I2C_EnableListen_IT(&hi2c1);   // bat ngat I2C, khi co thao tac read/write
 }
-
-//static void MMX_I2C1_Init(void)
-//{
-
-  /* USER CODE BEGIN I2C1_Init 0 */
-
-  /* USER CODE END I2C1_Init 0 */
-
-  /* USER CODE BEGIN I2C1_Init 1 */
-
-  /* USER CODE END I2C1_Init 1 */
-//  hi2c1.Instance = I2C1;
-//  hi2c1.Init.ClockSpeed = 100000;
-//  hi2c1.Init.DutyCycle = I2C_DUTYCYCLE_2;
-//  hi2c1.Init.OwnAddress1 = 0x50;
-//  hi2c1.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
-//  hi2c1.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
-//  hi2c1.Init.OwnAddress2 = 0x50;
-//  hi2c1.Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
-//  hi2c1.Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;
-//  if (HAL_I2C_Init(&hi2c1) != HAL_OK)
-//  {
-//    Error_Handler();
-//  }
-  /* USER CODE BEGIN I2C1_Init 2 */
-
-  /* USER CODE END I2C1_Init 2 */
-//}
-
-

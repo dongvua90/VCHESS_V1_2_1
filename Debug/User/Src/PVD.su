@@ -1,0 +1,2 @@
+../User/Src/PVD.c:13:6:HAL_PWR_PVDCallback	8	static
+../User/Src/PVD.c:19:6:PVD_Config	16	static

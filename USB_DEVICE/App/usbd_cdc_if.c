@@ -31,7 +31,7 @@
 
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
-uint8_t dataUsb_rxlength;
+uint16_t dataUsb_rxlength;
 uint8_t dataUsb_rx[64];
 /* USER CODE END PV */
 
@@ -265,7 +265,7 @@ static int8_t CDC_Receive_FS(uint8_t* Buf, uint32_t *Len)
   USBD_CDC_SetRxBuffer(&hUsbDeviceFS, &Buf[0]);
   USBD_CDC_ReceivePacket(&hUsbDeviceFS);
 
-  dataUsb_rxlength =  (uint8_t)* Len;
+  dataUsb_rxlength =  (uint16_t)* Len;
   memcpy(dataUsb_rx,Buf,dataUsb_rxlength);
   AnalyserCMD(dataUsb_rx,dataUsb_rxlength, USB);
 

@@ -68,7 +68,8 @@ Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
  C:/Users/dongv/Documents/STM32CUBE_IDE/VCHESS_V1.2.1/User/Inc/MB85RS256.h \
  C:/Users/dongv/Documents/STM32CUBE_IDE/VCHESS_V1.2.1/User/Inc/Interface.h \
  C:/Users/dongv/Documents/STM32CUBE_IDE/VCHESS_V1.2.1/User/Inc/RtcRealTime.h \
- C:/Users/dongv/Documents/STM32CUBE_IDE/VCHESS_V1.2.1/User/Inc/RtcRealTime.h
+ C:/Users/dongv/Documents/STM32CUBE_IDE/VCHESS_V1.2.1/User/Inc/RtcRealTime.h \
+ C:/Users/dongv/Documents/STM32CUBE_IDE/VCHESS_V1.2.1/User/Inc/PVD.h
 ../Core/Inc/main.h:
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h:
 ../Core/Inc/stm32f4xx_hal_conf.h:
@@ -147,3 +148,4 @@ C:/Users/dongv/Documents/STM32CUBE_IDE/VCHESS_V1.2.1/User/Inc/MB85RS256.h:
 C:/Users/dongv/Documents/STM32CUBE_IDE/VCHESS_V1.2.1/User/Inc/Interface.h:
 C:/Users/dongv/Documents/STM32CUBE_IDE/VCHESS_V1.2.1/User/Inc/RtcRealTime.h:
 C:/Users/dongv/Documents/STM32CUBE_IDE/VCHESS_V1.2.1/User/Inc/RtcRealTime.h:
+C:/Users/dongv/Documents/STM32CUBE_IDE/VCHESS_V1.2.1/User/Inc/PVD.h:

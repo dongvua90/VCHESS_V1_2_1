@@ -2,15 +2,15 @@
 
 //										0		1		2		3		4		5		6		7		8		9		10		11		12		13		14		15		16		17
 const uint16_t ListFrequency[18]	={  90,		96,  	103,  	110,  	118,  	130,  	140,  	151,  	165,  	180,  	200,  	220,  	242,  	265,  	295,   	320,   	345,  	370};
-const uint8_t ListLengthOut[18]		={  10,	 	10,  	10,		10,	  	10,		10,	  	6,		5,	  	5,		7,	   	6,	 	8,    	8,	 	10,    	10,	  	10,	  	12,   	12};
+const uint8_t ListLengthOut[18]		={  10,	 	10,  	6,		 6,	  	 6,		10,	  	6,		5,	  	5,		5,	   	5,	 	8,    	8,	 	10,    	10,	  	10,	  	12,   	12};
 // gia tri period chuan :       	 		933  	873   	813   	763   	713   	648   	602   	556   	510   	466   	421   	381   	347   	317   	285   	262   	243   	227
 const uint16_t mark_period_max[18] 	={	950,  	903,  	843,  	788,  	738,  	681,  	620,  	570,  	533,  	480,  	430,  	401,  	364,  	327,  	301,  	283,  	253,  	230};
 const uint16_t mark_period_min[18] 	={	903,  	843,  	788,  	738,  	681,  	620,  	570,  	533,  	480,  	430,  	401,  	364,  	327,  	301,  	240,  	220,  	200,  	180};
 //                                   	K      	Q     	B    	N     	R     	k     	q     	b     	n     	r     	p1    	p2    	p3    	p4    	P1    	P2    	P3    	P4
-const uint16_t ListIC_measure[18]  	={	37000,	43000,	34000,	32000,	25000,	25000,	24000,	25000,	32000,	28000, 	25000,	15000,	15000,	14000,	11000,	10000,	10000,	10000};
+const uint16_t ListIC_measure[18]  	={	50000,	43000,	50000,	48000,	40000,	30000,	38000,	38000,	40000,	28000, 	25000,	15000,	15000,	14000,	11000,	10000,	10000,	30000};
 const uint8_t offsetMeasure[18]		={	1,		5,		5,		5,		5,		1,		5,		5,		5,		5,		5,		5,		5,		5,		5,		5,		5,		5};
 const uint8_t sttscan[18] 			={0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17}; // stt scan piece type
-const uint8_t sttInOut[8] 			={1,4,7,2,5,8,3,6};								// stt output pulse & input coil
+const uint8_t sttInOut[8] 			={1,4,7,2,5,8,3,6};	//{1,4,7,2,5,8,3,6};								// stt output pulse & input coil
 
 extern TIM_HandleTypeDef htim1;
 extern TIM_HandleTypeDef htim2;
@@ -31,8 +31,8 @@ uint16_t inputCapture_data[IC_MAX]; // chứa dữ liệu InputPwm
 uint16_t startmeasure,stopmeasure;
 uint8_t  responce_length;
 uint16_t responce_period;
-
-
+// debug
+uint8_t firstlengg = 0;
 /* hàm callback khi phát pulse hoàn thành */
 void HAL_TIM_PWM_PulseFinishedCallback(TIM_HandleTypeDef *htim){
 	if(is_start_measure ==true){
@@ -93,7 +93,7 @@ void Measure(uint8_t type,uint8_t outCoil,uint8_t readCoil)
 	PulseOut(type,ListLengthOut[type], outCoil);
 	SelectReadCoil(readCoil);
 	/* Đưa các biến sử dụng trong đo đạc về giá trị ban đầu */
-	is_start_measure = true;
+
 	point_start_measure=0;
 	startmeasure=0;
 	stopmeasure=0;
@@ -107,14 +107,21 @@ void Measure(uint8_t type,uint8_t outCoil,uint8_t readCoil)
 	uint16_t period = 84000/ListFrequency[type]; 	// tính toán chu kỳ
 
 	/*	Thiết lập Timer để đo đạc tín hiệu trả về	*/
-	TIM4->ARR = ListIC_measure[type];	// xác định khoảng đo tối đa
+	if(outCoil==sttInOut[7] && readCoil==sttInOut[7]){
+		TIM4->ARR = 65000;// điểm cuối scan cần có khoảng thời gian đo lớn
+	}else{
+		TIM4->ARR = ListIC_measure[type];	// xác định khoảng đo tối đa
+	}
+
 	HAL_TIM_IC_Start_DMA(&htim4, TIM_CHANNEL_2,(uint32_t*)inputCapture_data, IC_MAX);  	// giá trị đo đạc lưu vào ic_data
 
+	is_start_measure = true;
     /* chờ cho quá trình đo PWM hoàn thành */
 	while(is_start_measure){
 		/*	Kiểm tra liên tục xem có xung phản hồi hay không? nếu không thì dừng quá trình đo lại luôn để tiết kiệm thời gian
 		 * khi quét ô cuối cùng thì không bỏ qua quá trình scan vì nó sẽ gây nhiễu đến piece type sau đó */
 		if(firstcheck && outCoil!=sttInOut[7] && readCoil!=sttInOut[7]){
+
 			if(TIM4->CNT > (period*18)){
 				if(inputCapture_data[10]==0){
 					/* Nếu không có xung phản hồi thì reset biến và đặt lại timer */
@@ -147,6 +154,7 @@ void Measure(uint8_t type,uint8_t outCoil,uint8_t readCoil)
 	 *
 	 *  */
 
+
 	/* xác định điểm đầu Measure */
 	for(int i=0;i<IC_MAX;i++){
 		if(inputCapture_data[i] >point_start_measure){
@@ -171,6 +179,11 @@ void Measure(uint8_t type,uint8_t outCoil,uint8_t readCoil)
 	/* tính toán số lượng Pulses phản hồi */
 	responce_length = stopmeasure-startmeasure;
 
+	//debug
+	if(type==0 && outCoil==1 && readCoil==1){
+		firstlengg = responce_length;
+	}
+
 	// tính period phản hồi
 	if(responce_length > offsetMeasure[type]+RANGE_MEASURE){
 		responce_period = (inputCapture_data[startmeasure+offsetMeasure[type]+RANGE_MEASURE] - inputCapture_data[startmeasure + offsetMeasure[type]]) / RANGE_MEASURE;
@@ -188,6 +201,7 @@ void Measure(uint8_t type,uint8_t outCoil,uint8_t readCoil)
 	datapieces[type][sq][PERIOD]=responce_period;
 #endif
 }
+
 /* hàm quét Pieces
  * Return 0: quá trình quét hoàn tất và không phát hiện sự thay đổi của FEN
  * Return 1: quá trình quét hoàn tất và phát hiện có sự thay đổi FEN
@@ -207,13 +221,13 @@ SCANRESULT Scan(bool enableClockSideInterrup)
 	}
 	/* Quét tất cả các Piece */
 	for(int i=0;i<18;i++){
-		int type = sttscan[i];
-		int outCoil =0;
-		int readCoil =0;
+		uint8_t type = sttscan[i];
+		uint8_t outCoil =0;
+		uint8_t readCoil =0;
 		for(int j=0;j<8;j++){
-			readCoil = sttInOut[j];
+			outCoil = sttInOut[j];
 			for(int k=0;k<8;k++){
-				outCoil = sttInOut[k];
+				readCoil =sttInOut[k];
 				if(chessclock_interrup==true && enableClockSideInterrup==true){
 					chessclock_interrup=false;
 					return SCAN_SIDE_CHANGED;

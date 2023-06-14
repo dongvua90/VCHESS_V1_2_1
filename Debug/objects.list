@@ -61,6 +61,7 @@
 "./User/Src/Bluetooth.o"
 "./User/Src/ChessClock.o"
 "./User/Src/MB85RS256.o"
+"./User/Src/PVD.o"
 "./User/Src/QueueData.o"
 "./User/Src/RtcRealTime.o"
 "./User/Src/SaveGame.o"

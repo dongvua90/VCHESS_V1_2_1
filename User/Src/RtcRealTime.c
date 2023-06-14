@@ -34,4 +34,15 @@ void RTC_SetTime(uint8_t* datatime)
   }
 }
 
+void BackupError_write(uint8_t error)
+{
+	HAL_RTCEx_BKUPWrite(&hrtc, RTC_BKP_DR11, (uint32_t)error);
+}
+
+uint8_t BackupError_read()
+{
+	uint32_t error = HAL_RTCEx_BKUPRead(&hrtc, RTC_BKP_DR11);
+	return (uint8_t)error;
+}
+
 

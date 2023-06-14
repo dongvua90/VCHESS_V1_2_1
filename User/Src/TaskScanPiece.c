@@ -12,6 +12,7 @@
 #include "MB85RS256.h"
 #include "QueueData.h"
 #include "Utilities.h"
+#include "calibase.h"
 
 #ifdef DEBUGSCAN
 uint8_t debug_type=1,debug_lengthOut=10,debug_outCoil=2,debug_inCoil;
@@ -45,6 +46,7 @@ void PushData(bool isClockChanged);
 void StartTaskScanPiece(void const *argument) {
 	ScanPiecesInit();
 	MB85RS_getPointSave();
+	Thresholdinit();
 	while (1) {
 #ifdef DEBUGSCAN
 		PulseOut(debug_type, debug_lengthOut, debug_outCoil);
